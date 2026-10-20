@@ -78,7 +78,7 @@ public class AuthorService {
 
         authorRepository.deleteById(id);
     }
-    
+
     private AuthorResponseDto toResponseDto(AuthorEntity entity) {
         return new AuthorResponseDto(
                 entity.getId(),
