@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +22,15 @@ public class AuthorService {
     public List<AuthorResponseDto> findAll() {
         return authorRepository.findAll()
                 .stream()
-                .map(this::toResponseDto)
-                .collect(Collectors.toList());
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public AuthorResponseDto findById(Long id) {
         AuthorEntity author = authorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Autor não encontrado com o ID: " + id));
-        return toResponseDto(author);
+        return toDto(author);
     }
 
     @Transactional
@@ -48,7 +47,7 @@ public class AuthorService {
 
         AuthorEntity authorSaved = authorRepository.save(author);
 
-        return toResponseDto(authorSaved);
+        return toDto(authorSaved);
     }
 
     @Transactional
@@ -67,7 +66,7 @@ public class AuthorService {
 
         AuthorEntity authorUpdated = authorRepository.save(author);
 
-        return toResponseDto(authorUpdated);
+        return toDto(authorUpdated);
     }
 
     @Transactional
@@ -79,7 +78,7 @@ public class AuthorService {
         authorRepository.deleteById(id);
     }
 
-    private AuthorResponseDto toResponseDto(AuthorEntity entity) {
+    private AuthorResponseDto toDto(AuthorEntity entity) {
         return new AuthorResponseDto(
                 entity.getId(),
                 entity.getName(),

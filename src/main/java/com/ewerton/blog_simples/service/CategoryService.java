@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +22,15 @@ public class CategoryService {
     public List<CategoryResponseDto> findAll() {
         return categoryRepository.findAll()
                 .stream()
-                .map(this::toResponseDto)
-                .collect(Collectors.toList());
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public CategoryResponseDto findById(Long id) {
         CategoryEntity category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com o ID: " + id));
-        return toResponseDto(category);
+        return toDto(category);
     }
 
     @Transactional
@@ -47,7 +46,7 @@ public class CategoryService {
 
         CategoryEntity categorySaved = categoryRepository.save(category);
 
-        return toResponseDto(categorySaved);
+        return toDto(categorySaved);
     }
 
     @Transactional
@@ -65,7 +64,7 @@ public class CategoryService {
 
         CategoryEntity categoryUpdated = categoryRepository.save(category);
 
-        return toResponseDto(categoryUpdated);
+        return toDto(categoryUpdated);
     }
 
     @Transactional
@@ -77,7 +76,7 @@ public class CategoryService {
         categoryRepository.deleteById(id);
     }
 
-    private CategoryResponseDto toResponseDto(CategoryEntity entity) {
+    private CategoryResponseDto toDto(CategoryEntity entity) {
         return new CategoryResponseDto(
                 entity.getId(),
                 entity.getName(),
