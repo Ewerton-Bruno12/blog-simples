@@ -38,6 +38,11 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.CONFLICT, "Conflito de Nome de Categoria", ex.getMessage());
     }
 
+    @ExceptionHandler(TagInUseException.class)
+    public ProblemDetail handleTagInUse(TagInUseException ex) {
+        return buildProblem(HttpStatus.CONFLICT, "Conflito de Tag vinculada", ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "desconhecido";
