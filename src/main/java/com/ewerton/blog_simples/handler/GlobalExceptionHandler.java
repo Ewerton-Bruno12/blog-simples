@@ -16,76 +16,46 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private ProblemDetail buildProblem(HttpStatus status, String title, String detail) {
+        var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+        problemDetail.setTitle(title);
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFound(ResourceNotFoundException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage()
-        );
-        problemDetail.setTitle("Recurso Não Encontrado");
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        return buildProblem(HttpStatus.NOT_FOUND, "Recurso Não Encontrado", ex.getMessage());
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ProblemDetail handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT,
-                ex.getMessage()
-        );
-        problemDetail.setTitle("Conflito de Email");
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        return buildProblem(HttpStatus.CONFLICT, "Conflito de Email", ex.getMessage());
     }
 
     @ExceptionHandler(NameAlreadyExistsException.class)
     public ProblemDetail handleServiceNameAlreadyExists(NameAlreadyExistsException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT,
-                ex.getMessage()
-        );
-        problemDetail.setTitle("Conflito de Nome de Categoria");
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        return buildProblem(HttpStatus.CONFLICT, "Conflito de Nome de Categoria", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String requiredType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "desconhecido";
+        String detail = "O parâmetro '" + ex.getName() + "' recebeu um valor inválido. Era esperado um valor do tipo " + requiredType + ".";
 
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
-                "O parâmetro '" + ex.getName()
-                        + "' recebeu um valor inválido. Era esperado um valor do tipo " + requiredType + "."
-        );
-        problemDetail.setTitle("Tipo de Parâmetro Inválido");
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        return buildProblem(HttpStatus.BAD_REQUEST, "Tipo de Parâmetro Inválido", detail);
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGlobalException(Exception ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Ocorreu um erro interno inesperado no servidor. Por favor, tente novamente mais tarde."
-        );
-        problemDetail.setTitle("Erro Interno do Servidor");
-        problemDetail.setProperty("timestamp", Instant.now());
-
-        return problemDetail;
+        String detail = "Ocorreu um erro interno inesperado no servidor. Por favor, tente novamente mais tarde.";
+        return buildProblem(HttpStatus.INTERNAL_SERVER_ERROR, "Erro Interno do Servidor", detail);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationError(MethodArgumentNotValidException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
-                "Um ou mais campos estão inválidos. Faça a correção e tente novamente."
-        );
-        problemDetail.setTitle("Erro de Validação");
+        String detail = "Um ou mais campos estão inválidos. Faça a correção e tente novamente.";
+        ProblemDetail problemDetail = buildProblem(HttpStatus.BAD_REQUEST, "Erro de Validação", detail);
 
         Map<String, String> invalidFields = ex.getBindingResult()
                 .getFieldErrors()
@@ -97,8 +67,6 @@ public class GlobalExceptionHandler {
                 ));
 
         problemDetail.setProperty("invalid_fields", invalidFields);
-        problemDetail.setProperty("timestamp", Instant.now());
-
         return problemDetail;
     }
 }
